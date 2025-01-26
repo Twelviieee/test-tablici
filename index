@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовая таблица</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        td {
+            border: 1px solid black;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            background-color: white;  
+            transition: background-color 0.3s;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: rgb(255, 255, 255);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            position: relative;
+        }
+        .close-button {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button id="button1">Просто кнопка</button>
+        <button id="button2">Что будет если нажать сюда?</button>
+        <button id="button3">Все цифры перемешались</button>
+    </div>
+    <table id="gameTable"></table>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        const table = document.getElementById('gameTable');
+        const modal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const matrix = [];
+
+ // функция для генерации таблицы, здесь также пишем числа что у нас есть в таблице, и ширину таблицы//
+
+//чтобы цвет таблицы снова стал белым,нужно перезагрузить страницу//
+        function generateTable() {
+            table.innerHTML = ''; 
+            matrix.length = 0; 
+
+            for (let i = 0; i < 5; i++) {
+                const row = document.createElement('tr');
+                matrix[i] = [];
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('td');
+                    const value = Math.round(Math.random());
+                    cell.textContent = value;
+                    matrix[i][j] = value;
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+            const cells = document.getElementsByTagName('td');
+            for (let cell of cells) {
+                cell.style.backgroundColor = 'white';
+            }
+        }
+
+// Пишу для себя, чтобы тут вычислить числа//
+//0.0.4.0.4//
+        function countOnesAround(row, col) {
+            let count = 0;
+            if (row > 0 && matrix[row - 1][col] === 1) count++; // сверху//
+            if (row < 4 && matrix[row + 1][col] === 1) count++; // снизу//
+            if (col > 0 && matrix[row][col - 1] === 1) count++; // слева//
+            if (col < 4 && matrix[row][col + 1] === 1) count++; // справа//
+            return count;
+        }
+
+ // Здесь функция с подсчетом нулей//
+//0.5.0.5.0.2//
+        function checkZeros() {
+            let zerosWithMoreThanTwoOnes = 0;
+
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (matrix[i][j] === 0) {
+                        const onesCount = countOnesAround(i, j);
+                        if (onesCount > 2) {
+                            zerosWithMoreThanTwoOnes++;
+                        }
+                    }
+                }
+            }
+
+            showModal(`Количество нулей с более чем двумя единицами рядом: ${zerosWithMoreThanTwoOnes}`);
+            highlightCells();
+        }
+
+        // для желтого цвета таблицы//
+        function highlightCells() {
+            const cells = document.getElementsByTagName('td');
+            for (let cell of cells) {
+                cell.style.backgroundColor = 'yellow'; 
+            }
+        }
+
+        // Окно, чтобы видеть результат при нажатии на вторую кнопку, которая названа как "Что будет если нажать сюда?"//
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        // Это для закрытия окна с результатами//
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // А без этого кнопки не будут работать, даже если нажать на них//
+        document.getElementById('button1').onclick = highlightCells; // Первая кнопка//
+        document.getElementById('button2').onclick = checkZeros; // Вторая кнопка//
+        document.getElementById('button3').onclick = function() { // Третья кнопка//
+            generateTable(); 
+            highlightCells();  
+        };
+
+        // Без этого таблица не сгенерируется//
+        generateTable(); 
+    </script>
+</body>
+</html>
